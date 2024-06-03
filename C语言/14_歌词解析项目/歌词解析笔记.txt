@@ -1,0 +1,39 @@
+参考答案讲解:
+	1、功能（歌曲播放、歌曲信息显示、时钟显示变化、歌词滚动显示、歌词高亮)
+	2、分析源码（先整体后部分)
+		2.1目录结构:
+			./lrc	歌词文件
+			./pos	光标定位及颜色的c文件
+			./song	歌曲文件
+			./pro	工程文件（空)
+			Makefile 编译规则
+			main.c	主文件
+			lrc.c/Irc.h	分文件歌词处理
+			start_mplayer.c/start_mplayer.h	分文件播放歌曲
+		2.2Makefile 编译规则:
+			明确main.c.Irc.c. start_mplayer.c . ./pos/console.c参与编译
+		2.3main.c
+			main函数
+				开始:
+				read_src_file读出歌词文件内容并保存到返回值
+				---->strtok_lrc_buf将读出歌词文件内容切割成一行一行并保存到指针数组，返回值为行数。
+				---- >lrc _head_resolve处理前四行歌词
+				[ti:简单爱]------>简单爱(song_msg[0])
+				[ar:周杰伦]------>周杰伦(song _msg[1])
+				[al:范特西]------>范特西(song_msg[2])
+				[by:大脸猫]------>大脸猫(song_msg[3])
+				----->lrc_resolve处理带时间的歌词
+				[00:04.41]周杰伦Chow,Jay Jou---->双向链表中的一个节点
+				[02:04.94][00:36.09]我想大声宣布对你依依不舍----》双向链表中的两个节点
+				---》free回收使用完的内存。
+				---》print_song _message打印前四行歌词
+				---》time_printf打印时间
+				---》Irc_printf打印前五句歌词，无高亮
+				----》mplayer_play播放歌曲
+			循环:
+				时钟每隔1s+1并显现
+				find_start_point和lrc_printf保证了歌词一直显示5行，且第一个参数是5行的起始节点，第二个高亮的节点
+			清理:
+				link_free(head);//释放链表
+				song_msg_free(song_msg);//释放歌曲信息
+				cusor_show();//显示光标
